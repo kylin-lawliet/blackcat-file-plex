@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackcat.nas.dao.VideoSeasonsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.blackcat.nas.entity.VideoSeasons">
+        <id column="id" property="id" />
+        <result column="seasons_name" property="seasonsName" />
+        <result column="file_path" property="filePath" />
+        <result column="seasons_number" property="seasonsNumber" />
+        <result column="series_name" property="seriesName" />
+        <result column="episode_count" property="episodeCount" />
+        <result column="introduction" property="introduction" />
+        <result column="broadcast_time" property="broadcastTime" />
+        <result column="video_name" property="videoName" />
+    </resultMap>
+    <sql id="pageWhere">
+        <where>
+            <if test="videoName!=null and videoName!=''">
+                and vsn.video_name LIKE CONCAT('%',#{videoName} ,'%' )
+            </if>
+            <if test="seasonsNumber!=null">
+                and vse.seasons_number =#{seasonsNumber}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT  vse.*, vsn.video_name
+        FROM video_seasons vse
+        JOIN video_scan vsn ON vse.video_id = vsn.video_id
+        <include refid="pageWhere"/>
+        LIMIT #{end} OFFSET #{start}
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT  count(1)
+        FROM video_seasons vse
+        JOIN video_scan vsn ON vse.video_id = vsn.video_id
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="getOne" resultMap="BaseResultMap">
+        SELECT  vse.*, vsn.video_name
+        FROM video_seasons vse
+        JOIN video_scan vsn ON vse.video_id = vsn.video_id
+        where vse.id=#{id}
+    </select>
+
+</mapper>

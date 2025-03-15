@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackcat.nas.dao.VideoEpisodesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.blackcat.nas.entity.VideoEpisodes">
+        <id column="id" property="id" />
+        <result column="broadcast_time" property="broadcastTime" />
+        <result column="episode_number" property="episodeNumber" />
+        <result column="name" property="name" />
+        <result column="introduction" property="introduction" />
+        <result column="runtime" property="runtime" />
+        <result column="season_number" property="seasonNumber" />
+        <result column="video_name" property="videoName" />
+        <result column="seasons_name" property="seasonsName" />
+    </resultMap>
+
+    <sql id="pageWhere">
+        <where>
+            <if test="videoName!=null and videoName!=''">
+                and vs.video_name LIKE CONCAT('%',#{videoName} ,'%' )
+            </if>
+            <if test="seasonsNumber!=null">
+                and vse.seasons_number =#{seasonsNumber}
+            </if>
+            <if test="episodeNumber!=null">
+                and vep.episode_number =#{episodeNumber}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT vs.video_name,vse.seasons_name,vse.seasons_number,vep.*
+        FROM video_scan vs
+        JOIN video_seasons vse ON vs.video_id = vse.video_id
+        JOIN video_episodes vep ON vse.seasons_number = vep.season_number AND vse.tmdb_id = vep.show_id
+        <include refid="pageWhere"/>
+        LIMIT #{end} OFFSET #{start}
+    </select>
+
+    <select id="selectPageCount" resultType="java.lang.Integer">
+        SELECT  count(1)
+        FROM video_scan vs
+        JOIN video_seasons vse ON vs.video_id = vse.video_id
+        JOIN video_episodes vep ON vse.seasons_number = vep.season_number AND vse.tmdb_id = vep.show_id
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="getOne" resultMap="BaseResultMap">
+        SELECT vs.video_name,vse.seasons_name,vse.seasons_number,vep.*
+        FROM video_scan vs
+        JOIN video_seasons vse ON vs.video_id = vse.video_id
+        JOIN video_episodes vep ON vse.seasons_number = vep.season_number AND vse.tmdb_id = vep.show_id
+        where vep.id=#{id}
+    </select>
+
+</mapper>

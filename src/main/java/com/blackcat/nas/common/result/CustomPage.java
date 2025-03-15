@@ -11,7 +11,6 @@ import java.util.List;
  * @author : zhangdahui  2024/8/26 上午10:36
  */
 @Data
-@NoArgsConstructor
 public class CustomPage {
 
     /** 当前页数 */
@@ -21,9 +20,16 @@ public class CustomPage {
     /** 总的记录条数 */
     private int totalCount;
     /** 本页的数据列表 */
-    private List<Object> dataList;
+    private List dataList;
     /** 总的页数 */
     private int totalPageCount;
+
+
+    public CustomPage() {
+        this.pageNow = 1;
+        this.pageSize = 10;
+        this.totalCount = 0;
+    }
 
     /**
      * 快速创建对象
@@ -32,7 +38,7 @@ public class CustomPage {
      * @param pageNow 当前页
      * @param pageSize 每页显示记录的条数
      */
-    public CustomPage(List<Object> dataList,int totalCount, int pageNow, int pageSize) {
+    public CustomPage(List dataList,int totalCount, int pageNow, int pageSize) {
         this.dataList = dataList;
         this.totalCount = totalCount;
         this.pageNow = pageNow;

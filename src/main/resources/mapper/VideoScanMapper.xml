@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackcat.nas.dao.VideoScanMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.blackcat.nas.entity.VideoScan">
+        <id column="video_id" property="videoId" />
+        <result column="video_name" property="videoName" />
+        <result column="video_path" property="videoPath" />
+        <result column="broadcast_time" property="broadcastTime" />
+        <result column="user_score" property="userScore" />
+        <result column="video_type" property="videoType" />
+        <result column="tmdb_id" property="tmdbId" />
+        <result column="resolution" property="resolution" />
+        <result column="video_category" property="videoCategory" />
+        <result column="series_name" property="seriesName" />
+    </resultMap>
+
+    <sql id="pageWhere">
+        <where>
+            <if test="name!=null and name!=''">
+                and v.series_name LIKE CONCAT('%',#{name} ,'%' )
+            </if>
+            <if test="category!=null and category!=''">
+                and v.video_directory = #{category}
+            </if>
+        </where>
+    </sql>
+    <select id="selectPageBySeriesName" resultMap="BaseResultMap">
+        SELECT v.video_id, v.series_name, v.video_type, v.video_path, v.video_category, v.broadcast_time, v.user_score, v.tmdb_id
+        FROM video_scan v
+        JOIN (
+            SELECT *,
+                ROW_NUMBER() OVER (
+                PARTITION BY series_name
+                ORDER BY
+                CASE WHEN video_type = 'tv' THEN 0 ELSE 1 END,
+                video_id
+                ) as rn
+            FROM video_scan
+        ) AS ranked_records ON v.video_id = ranked_records.video_id AND ranked_records.rn = 1
+        <include refid="pageWhere"/>
+        ORDER BY v.series_name
+
+        LIMIT #{end} OFFSET #{start}
+    </select>
+
+    <select id="selectPageBySeriesNameCount" resultType="java.lang.Integer">
+        SELECT count(v.video_id)
+        FROM video_scan v
+        JOIN (
+            SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY series_name
+                ORDER BY
+                CASE WHEN video_type = 'tv' THEN 0 ELSE 1 END,
+                video_id
+            ) as rn
+            FROM video_scan
+        ) AS ranked_records ON v.video_id = ranked_records.video_id AND ranked_records.rn = 1
+        <include refid="pageWhere"/>
+        ORDER BY v.series_name
+    </select>
+
+
+</mapper>
